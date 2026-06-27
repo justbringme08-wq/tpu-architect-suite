@@ -1,0 +1,35 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@4.6.0
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - node/install-packages
+      - run: npm install
+      - run: npm run build
+
+  deploy:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - node/install-packages
+      - run:
+          name: Deploy to MongoDB Atlas
+          command: |
+            ssh -i ./id_rsa <your-ssh-user>@<your-ssh-host> "cd <path-to-app> && git pull && npm install && pm2 restart <app-name>"
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - node/build:
+          name: Build app
+      - node/deploy:
+          name: Deploy app
+          requires:
+            - node/build

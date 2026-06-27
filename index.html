@@ -1,0 +1,340 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google TPU Architect, Simulator & Presentation Hub</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Lato', sans-serif;
+    }
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Poppins', sans-serif;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .neon-border-blue {
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+    }
+    .neon-border-green {
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+    }
+    .systolic-node {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes pulse-ring {
+      0%, 100% { transform: scale(0.95); opacity: 0.5; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+    .pulse-ring {
+      animation: pulse-ring 2.5s infinite ease-in-out;
+    }
+    /* Presentation Specific Slides CSS */
+    .slide-view {
+      display: none;
+      height: 100%;
+      width: 100%;
+      transition: opacity 0.5s ease-in-out;
+    }
+    .slide-view.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+  <!-- Header Banner -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-50 px-4 py-3 sm:px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20">
+          <i class="fa-solid fa-microchip text-xl animate-pulse"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent">
+            TPU Architect & Presentation Hub
+          </h1>
+          <p class="text-xs text-slate-400 font-medium">Interactive Pipeline Emulator, OCS Topology Mapper, & Presentation Suite</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Shadow Engine v2.0
+        </span>
+        <span class="text-xs text-slate-500 font-mono border-l border-slate-800 pl-3">Sir Jthan Edition</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs / Controls -->
+  <nav class="bg-slate-900 border-b border-slate-800 sticky top-[61px] z-40">
+    <div class="max-w-7xl mx-auto px-4 flex flex-wrap gap-1">
+      <button onclick="switchTab('simulation')" id="tab-simulation" class="px-4 py-3 border-b-2 border-blue-500 text-blue-400 text-sm font-bold flex items-center gap-2 transition">
+        <i class="fa-solid fa-calculator"></i> Workload & Predictor Sandbox
+      </button>
+      <button onclick="switchTab('emulator')" id="tab-emulator" class="px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-sm font-bold flex items-center gap-2 transition">
+        <i class="fa-solid fa-wave-square"></i> Systolic Array Emulator
+      </button>
+      <button onclick="switchTab('topology')" id="tab-topology" class="px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-sm font-bold flex items-center gap-2 transition">
+        <i class="fa-solid fa-network-wired"></i> OCS Topology & Torus
+      </button>
+      <button onclick="switchTab('comparison')" id="tab-comparison" class="px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-sm font-bold flex items-center gap-2 transition">
+        <i class="fa-solid fa-list-check"></i> Generational Specs Matrix
+      </button>
+      <!-- Integrated Presentation Slide Deck Tab Button -->
+      <button onclick="switchTab('presentation')" id="tab-presentation" class="px-4 py-3 border-b-2 border-transparent text-emerald-400 hover:text-emerald-300 text-sm font-bold flex items-center gap-2 transition ml-auto bg-emerald-500/10 border-l border-r border-slate-800">
+        <i class="fa-solid fa-file-powerpoint animate-bounce"></i> Interactive Slide Deck Mode
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Grid Layout Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+
+    <!-- TAB 1: WORKLOAD PREDICTOR SIMULATION -->
+    <div id="section-simulation" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Input Parameters -->
+      <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col gap-5">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-blue-500"></i> Workload & Cluster Configurator
+          </h2>
+          <p class="text-xs text-slate-400">Define model size, run length, and hardware targets to predict bottlenecks.</p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <!-- Hardware Select -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">TPU Accelerator Target</label>
+            <select id="sim-tpu-gen" onchange="runSimulation()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition">
+              <option value="v1">TPU v1 (8-bit Integer Inference)</option>
+              <option value="v2">TPU v2 (bfloat16 Pioneer)</option>
+              <option value="v3">TPU v3 (Liquid-cooled Pod Core)</option>
+              <option value="v4">TPU v4 (3D Torus via OCS Optical Switches)</option>
+              <option value="v5e">TPU v5e (Cost-optimized Slicing Node)</option>
+              <option value="v5p">TPU v5p (Super-scale 95GB HBM3 Training)</option>
+              <option value="v6" selected>TPU v6 Trillium (4.7x Compute Boost vs v5p)</option>
+            </select>
+          </div>
+
+          <!-- Nodes / Chips count -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">Number of TPU Chips (System Scale)</label>
+            <div class="flex gap-3">
+              <input type="range" id="sim-chips-range" min="1" max="1024" step="1" value="256" oninput="updateChipsInput(this.value)" class="flex-1 accent-blue-500">
+              <input type="number" id="sim-chips" min="1" max="8192" value="256" onchange="updateChipsRange(this.value)" class="w-20 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-center font-mono">
+            </div>
+          </div>
+
+          <div class="border-t border-slate-800/80 my-1"></div>
+
+          <!-- Workload Specifications -->
+          <div>
+            <h3 class="text-xs font-bold uppercase text-blue-400 tracking-wider mb-3">Model Parameters & Shape</h3>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Model Size (Billion Parameters)</label>
+                <input type="number" id="sim-params" min="1" max="2000" value="70" onchange="runSimulation()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 font-mono">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Total Tokens (Billions)</label>
+                <input type="number" id="sim-tokens" min="1" max="10000" value="2000" onchange="runSimulation()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 font-mono">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-3">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Sequence Length (Context)</label>
+                <input type="number" id="sim-seq-len" min="512" max="131072" step="512" value="8192" onchange="runSimulation()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 font-mono">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Batch Size (Per Step)</label>
+                <input type="number" id="sim-batch-size" min="1" max="2048" value="128" onchange="runSimulation()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 font-mono">
+              </div>
+            </div>
+          </div>
+
+          <button onclick="runSimulation()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition mt-2 shadow-lg shadow-blue-500/10">
+            <i class="fa-solid fa-play"></i> Re-Calculate System Run
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Predictions & Metrics Dashboard -->
+      <div class="lg:col-span-7 flex flex-col gap-6">
+        <!-- Live Run Metrics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col">
+            <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Estimated Run Time</span>
+            <span id="metric-duration" class="text-2xl font-black text-blue-400 font-mono mt-1">Calculating...</span>
+            <span class="text-[10px] text-slate-400 mt-1">Based on FLOPS execution</span>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col">
+            <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">System TFLOPS</span>
+            <span id="metric-tflops" class="text-2xl font-black text-emerald-400 font-mono mt-1">Calculating...</span>
+            <span class="text-[10px] text-slate-400 mt-1">Aggregate performance</span>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col col-span-2 sm:col-span-1">
+            <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Memory Bound Level</span>
+            <span id="metric-mem-bound" class="text-2xl font-black text-indigo-400 font-mono mt-1">Calculating...</span>
+            <span class="text-[10px] text-slate-400 mt-1">HBM constraint index</span>
+          </div>
+        </div>
+
+        <!-- System Architecture Deep Info Box -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg">
+                <i class="fa-solid fa-cube"></i>
+              </span>
+              <h3 class="font-bold text-slate-100">Simulated Microarchitectural Profile</h3>
+            </div>
+            <span class="text-xs text-slate-400 font-mono" id="sim-tpu-name">TPU v6 Trillium</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+              <span class="text-slate-500 uppercase font-mono tracking-wider text-[10px] block mb-1">Aggregate Cluster Bandwidth</span>
+              <span id="sim-profile-bw" class="font-semibold text-slate-200">2,560,000 GB/s</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+              <span class="text-slate-500 uppercase font-mono tracking-wider text-[10px] block mb-1">Max Power Envelope (Estimated)</span>
+              <span id="sim-profile-power" class="font-semibold text-slate-200">112.5 kW</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+              <span class="text-slate-500 uppercase font-mono tracking-wider text-[10px] block mb-1">Bisection Latency Rate</span>
+              <span id="sim-profile-latency" class="font-semibold text-slate-200">Low sub-microsecond range</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60">
+              <span class="text-slate-500 uppercase font-mono tracking-wider text-[10px] block mb-1">Compute Precision Priority</span>
+              <span id="sim-profile-precision" class="font-semibold text-slate-200">bfloat16 / FP8 / INT8 support</span>
+            </div>
+          </div>
+
+          <div class="mt-2 bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 flex gap-3 items-start">
+            <i class="fa-solid fa-circle-info text-blue-400 mt-0.5"></i>
+            <div>
+              <h4 class="text-xs font-bold text-blue-300">Architectural Insights & Bottleneck Warning</h4>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed" id="sim-bottleneck-desc">
+                Calculating...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SYSTOLIC ARRAY PIPELINE EMULATOR -->
+    <div id="section-emulator" class="tab-content hidden flex flex-col gap-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-5">
+          <div>
+            <h3 class="font-bold text-lg text-white">Systolic Matrix Multiply Unit Pipeline Emulator</h3>
+            <p class="text-xs text-slate-400">Step through how a TPU Weight-Stationary array executes parallel logic cycles.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="startSystolicSimulation()" id="btn-run-array" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-play"></i> Start Clock Cycles
+            </button>
+            <button onclick="resetSystolicSimulation()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-8 bg-slate-950 border border-slate-800/80 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden min-h-[350px]">
+            <div class="absolute top-4 left-4 text-[10px] font-mono uppercase text-slate-500 tracking-wider">
+              Clock Cycle: <span id="systolic-cycle" class="text-blue-400 font-bold">0</span> / 12
+            </div>
+
+            <!-- Dynamic Nodes Grid -->
+            <div class="grid grid-cols-4 gap-4" id="systolic-matrix-container"></div>
+
+            <!-- Direction Indicators -->
+            <div class="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col gap-1 items-center justify-center text-xs text-blue-500 font-mono">
+              <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Activations Input</span>
+              <i class="fa-solid fa-arrow-right animate-pulse text-lg"></i>
+            </div>
+            <div class="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col gap-1 items-center justify-center text-xs text-emerald-500 font-mono">
+              <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Outputs Accumulation</span>
+              <i class="fa-solid fa-circle-check text-lg"></i>
+            </div>
+          </div>
+
+          <!-- Configuration side-panel -->
+          <div class="lg:col-span-4 flex flex-col gap-4">
+            <div class="bg-slate-950 border border-slate-850 p-4 rounded-xl flex flex-col gap-3">
+              <h4 class="text-xs font-bold text-white uppercase tracking-wider">Emulator Variables</h4>
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-1">Set Array Matrix Weights (INT8)</label>
+                <div class="grid grid-cols-4 gap-1.5 text-center text-xs">
+                  <input type="number" id="weight-0" value="4" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-center font-mono">
+                  <input type="number" id="weight-1" value="2" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-center font-mono">
+                  <input type="number" id="weight-2" value="1" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-center font-mono">
+                  <input type="number" id="weight-3" value="5" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-center font-mono">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-1">Active Input Vector (Activation Data)</label>
+                <div class="grid grid-cols-4 gap-1.5 text-center text-xs">
+                  <input type="number" id="act-0" value="3" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-center font-mono">
+                  <input type="number" id="act-1" value="8" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-center font-mono">
+                  <input type="number" id="act-2" value="1" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-center font-mono">
+                  <input type="number" id="act-3" value="4" class="bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-center font-mono">
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-850 p-4 rounded-xl flex flex-col">
+              <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Compute Output Result Matrix</span>
+              <div class="grid grid-cols-4 gap-2 mt-2 text-center text-xs font-mono font-bold" id="array-outputs">
+                <div class="bg-slate-900 border border-slate-800 text-slate-400 py-1 rounded">0</div>
+                <div class="bg-slate-900 border border-slate-800 text-slate-400 py-1 rounded">0</div>
+                <div class="bg-slate-900 border border-slate-800 text-slate-400 py-1 rounded">0</div>
+                <div class="bg-slate-900 border border-slate-800 text-slate-400 py-1 rounded">0</div>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                As clock cycles advance, activation values shift rightward while stationary weights stay anchored. Output values are accumulated inside local registers.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: OCS TOPOLOGY & TORUS -->
+    <div id="section-topology" class="tab-content 
